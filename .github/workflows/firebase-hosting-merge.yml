@@ -12,19 +12,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install Flutter
-        run: git clone https://github.com/flutter/flutter.git
+        run: git clone https://github.com/flutter/flutter.git --depth 1 -b stable "$GITHUB_WORKSPACE/_flutter"
 
       # PATH を通す
       - name: Add path
-        run: echo "$(pwd)/flutter/bin" >> $GITHUB_PATH
+        run: echo "$GITHUB_WORKSPACE/_flutter/bin" >> $GITHUB_PATH
 
       # パッケージのダウンロード
       - name: Download Flutter packages
+        working-directory: ./flutter
         run: flutter pub get
-        
-      - run: flutter build web
+      - name: Flutter Build
+        working-directory: ./flutter
+        run: flutter build web
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
+          entryPoint: ./firebase
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_TALKDIRECTOR_D52E8 }}'
           channelId: live
